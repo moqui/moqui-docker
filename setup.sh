@@ -135,6 +135,11 @@ ELASTICSEARCH_PASSWORD=${ELASTICSEARCH_PASSWORD:-$(head -c 16 /dev/random | base
 read -rp "Enter your Elasticsearch password [$ELASTICSEARCH_PASSWORD]: " input
 ELASTICSEARCH_PASSWORD=${input:-$ELASTICSEARCH_PASSWORD}
 
+MOQUI_IMAGE=${MOQUI_IMAGE:-moqui/moquidemo}
+read -rp "Enter your moqui image [$MOQUI_IMAGE]: " input
+$MOQUI_IMAGE=${input:-$MOQUI_IMAGE}
+
+
 # Save the environment variables to a .env file
 cat <<EOF > .env
 POSTGRES_PASSWORD=$POSTGRES_PASSWORD
@@ -145,6 +150,7 @@ DEFAULT_HOST=$DEFAULT_HOST
 DEFAULT_EMAIL=$DEFAULT_EMAIL
 LETSENCRYPT_TEST=$LETSENCRYPT_TEST
 ACME_EMAIL=$ACME_EMAIL
+MOQUI_IMAGE=$MOQUI_IMAGE
 EOF
 
 echo "Environment setup complete. Configuration saved in $MOQUI_SETUP_DIR/.env file."
@@ -153,5 +159,4 @@ echo "Environment setup complete. Configuration saved in $MOQUI_SETUP_DIR/.env f
 
 # Run ./compose-up default-compose.yml
 # if it fails, run ./compose-down.sh default-compose.yml
-./compose-up.sh default-compose.yml . moqui eclipse-temurin:11-jdk .env
-
+./compose-up.sh default-compose.yml . eclipse-temurin:11-jdk .env

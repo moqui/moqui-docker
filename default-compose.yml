@@ -69,7 +69,7 @@ services:
       - nginx-proxy
 
   moqui-server:
-    image: moqui
+    image: ${MOQUI_IMAGE:-moqui}
     container_name: moqui-server
     command: conf=conf/MoquiProductionConf.xml no-run-es
     restart: always
