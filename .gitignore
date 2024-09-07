@@ -1,0 +1,62 @@
+# runtime directory (separate repository so ignore directory entirely)
+/runtime
+/execwartmp
+/db
+/elasticsearch/data/nodes
+/opensearch/data/nodes/*
+!/opensearch/data/nodes/README
+/acme.sh
+/nginx/conf.d
+/nginx/vhost.d
+/nginx/html
+## Do not want to accidentally commit production certificates https://www.theregister.com/2024/07/25/data_from_deleted_github_repos/
+/certs
+!/certs/moqui1.local.*
+!/certs/moqui2.local.*
+!/certs/moqui.local.*
+!/certs/README
+
+# Sensitive files
+.env
+*.env
+
+# IntelliJ IDEA files
+.idea
+out
+*.ipr
+*.iws
+*.iml
+
+# Eclipse files (and some general ones also used by Eclipse)
+.metadata
+bin
+tmp
+*.tmp
+*.bak
+*.swp
+*~.nib
+local.properties
+.settings
+.loadpath
+
+# NetBeans files
+nbproject/private
+nbbuild
+.nb-gradle
+nbdist
+nbactions.xml
+nb-configuration.xml
+
+# OSX auto files
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Windows auto files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Linux auto files
+*~
