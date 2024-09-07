@@ -3,6 +3,46 @@
 # Set Moqui setup directory
 MOQUI_SETUP_DIR="/opt/moqui"
 
+# install git on any linux distro
+# Detect the package manager and install Git
+if [ -x "$(command -v apt-get)" ]; then
+  # Debian-based distributions (e.g., Ubuntu)
+  echo "Detected Debian-based distribution. Installing Git..."
+  sudo apt-get update -y
+  sudo apt-get install git -y
+elif [ -x "$(command -v dnf)" ]; then
+  # Red Hat-based distributions (e.g., Fedora)
+  echo "Detected Red Hat-based distribution. Installing Git..."
+  sudo dnf install git -y
+elif [ -x "$(command -v yum)" ]; then
+  # CentOS or older Red Hat-based distributions
+  echo "Detected CentOS/older Red Hat-based distribution. Installing Git..."
+  sudo yum install git -y
+elif [ -x "$(command -v pacman)" ]; then
+  # Arch-based distributions (e.g., Arch Linux, Manjaro)
+  echo "Detected Arch-based distribution. Installing Git..."
+  sudo pacman -Sy git --noconfirm
+elif [ -x "$(command -v zypper)" ]; then
+  # SUSE-based distributions (e.g., openSUSE)
+  echo "Detected SUSE-based distribution. Installing Git..."
+  sudo zypper install -y git
+elif [ -x "$(command -v apk)" ]; then
+  # Alpine-based distributions
+  echo "Detected Alpine-based distribution. Installing Git..."
+  sudo apk add git
+else
+  echo "Unsupported distribution or package manager not detected."
+  exit 1
+fi
+
+# Verify installation
+if git --version >/dev/null 2>&1; then
+  echo "Git installation successful. Version: $(git --version)"
+else
+  echo "Git installation failed."
+  exit 1
+fi
+
 # Check if $MOQUI_SETUP_DIR exists; if not, clone the repository
 if [ ! -d "$MOQUI_SETUP_DIR" ]; then
   echo "Cloning Moqui Docker repository..."
