@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Set Moqui setup directory
-MOQUI_SETUP_DIR="/opt/moqui"
+MOQUI_SETUP_DIR="moqui"
 
 if ! [ -x "$(command -v docker)" ]; then
   echo 'Docker is not installed. Please install Docker by running...'
@@ -31,26 +31,46 @@ if [ -n "$1" ]; then
 elif [ -n "$MOQUI_SETUP_DIR" ]; then
   echo "Using environment variable MOQUI_SETUP_DIR: $MOQUI_SETUP_DIR"
 else
-  read -p "Enter the directory path for Moqui setup (default: 'moqui'): " USER_INPUT
+  read -p "Enter the directory path for Moqui setup [$MOQUI_SETUP_DIR]: " USER_INPUT
 
   # If the user didn't provide input, set a default value
   if [ -z "$USER_INPUT" ]; then
-    if [ -d "moqui" ]; then
+    if [ -d "$MOQUI_SETUP_DIR" ]; then
       # Generate a random string with a prefix of 'moqui-'
       RANDOM_SUFFIX=$(openssl rand -hex 4)
       MOQUI_SETUP_DIR="moqui-$RANDOM_SUFFIX"
       echo "Defaulting to generated directory: $MOQUI_SETUP_DIR"
-    else
-      MOQUI_SETUP_DIR="moqui"
-      echo "Defaulting to directory: $MOQUI_SETUP_DIR"
     fi
   else
     MOQUI_SETUP_DIR="$USER_INPUT"
   fi
 fi
 
-curl -v https://github.com/moqui/moqui-docker.zip -o "$MOQUI_SETUP_DIR".zip
-unzip "$MOQUI_SETUP_DIR".zip -d "$MOQUI_SETUP_DIR"
+# Define the download URL for the .tar.gz version of the repository
+DOWNLOAD_URL="https://github.com/moqui/moqui-docker/archive/refs/heads/master.tar.gz"
+
+# Download the tar.gz file using curl
+curl -sL "$DOWNLOAD_URL" -o "$MOQUI_SETUP_DIR.tar.gz"
+
+# Ensure the `gunzip` command is available
+if ! command -v gunzip &> /dev/null; then
+  echo "gunzip could not be found. Please install gunzip and try again."
+  exit 1
+fi
+
+# Create the directory if it doesn't exist
+mkdir -p "$MOQUI_SETUP_DIR"
+
+# Use gunzip to decompress the .tar.gz file
+gunzip -q "$MOQUI_SETUP_DIR.tar.gz"
+
+# Extract the resulting .tar file to the specified directory
+tar -xf "$MOQUI_SETUP_DIR.tar" -C "$MOQUI_SETUP_DIR" --strip-components 1
+
+# Remove the downloaded .tar file after extraction
+rm "$MOQUI_SETUP_DIR.tar"
+
+echo "Moqui Docker repository has been set up in $MOQUI_SETUP_DIR."
 
 # TODO: validate domain for acme http verification
 
