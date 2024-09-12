@@ -3,82 +3,56 @@
 # Set Moqui setup directory
 MOQUI_SETUP_DIR="/opt/moqui"
 
-if ! [ -x "$(command -v git)" ]; then
-  # install git on any linux distro
-  # Detect the package manager and install Git
-  if [ -x "$(command -v apt-get)" ]; then
-    # Debian-based distributions (e.g., Ubuntu)
-    echo "Detected Debian-based distribution. Installing Git..."
-    sudo apt-get update -y
-    sudo apt-get install git -y
-  elif [ -x "$(command -v dnf)" ]; then
-    # Red Hat-based distributions (e.g., Fedora)
-    echo "Detected Red Hat-based distribution. Installing Git..."
-    sudo dnf install git -y
-  elif [ -x "$(command -v yum)" ]; then
-    # CentOS or older Red Hat-based distributions
-    echo "Detected CentOS/older Red Hat-based distribution. Installing Git..."
-    sudo yum install git -y
-  elif [ -x "$(command -v pacman)" ]; then
-    # Arch-based distributions (e.g., Arch Linux, Manjaro)
-    echo "Detected Arch-based distribution. Installing Git..."
-    sudo pacman -Sy git --noconfirm
-  elif [ -x "$(command -v zypper)" ]; then
-    # SUSE-based distributions (e.g., openSUSE)
-    echo "Detected SUSE-based distribution. Installing Git..."
-    sudo zypper install -y git
-  elif [ -x "$(command -v apk)" ]; then
-    # Alpine-based distributions
-    echo "Detected Alpine-based distribution. Installing Git..."
-    sudo apk add git
-  else
-    echo "Unsupported distribution or package manager not detected."
-    exit 1
-  fi
-
-  # Verify installation
-  if git --version >/dev/null 2>&1; then
-    echo "Git installation successful. Version: $(git --version)"
-  else
-    echo "Git installation failed."
-    exit 1
-  fi
-fi
-
 if ! [ -x "$(command -v docker)" ]; then
-  echo 'Docker is not installed. Installing Docker...'
+  echo 'Docker is not installed. Please install Docker by running...'
 
   # Download the convenience script
-  curl -fsSL https://get.docker.com -o get-docker.sh
+  echo "curl -fsSL https://get.docker.com -o get-docker.sh"
 
   # Run the convenience script
-  sh get-docker.sh
+  echo "sh get-docker.sh"
 
   # Clean up
-  rm get-docker.sh
-
-  echo 'Docker installation completed.'
+  echo "rm get-docker.sh"
+  exit 1
 else
   echo 'Docker is already installed.'
 fi
 
 # Ensure that the docker daemon is running
 if ! systemctl is-active --quiet docker; then
-  echo 'Starting Docker service...'
-  sudo systemctl start docker
+  echo 'Please start Docker service by running...'
+  echo "systemctl start docker"
 fi
 
 # Check if $MOQUI_SETUP_DIR exists; if not, clone the repository
-if [ ! -d "$MOQUI_SETUP_DIR" ]; then
-  echo "Cloning Moqui Docker repository..."
-  git clone https://github.com/moqui/moqui-docker.git "$MOQUI_SETUP_DIR"
+if [ -n "$1" ]; then
+  MOQUI_SETUP_DIR="$1"
+elif [ -n "$MOQUI_SETUP_DIR" ]; then
+  echo "Using environment variable MOQUI_SETUP_DIR: $MOQUI_SETUP_DIR"
+else
+  read -p "Enter the directory path for Moqui setup (default: 'moqui'): " USER_INPUT
+
+  # If the user didn't provide input, set a default value
+  if [ -z "$USER_INPUT" ]; then
+    if [ -d "moqui" ]; then
+      # Generate a random string with a prefix of 'moqui-'
+      RANDOM_SUFFIX=$(openssl rand -hex 4)
+      MOQUI_SETUP_DIR="moqui-$RANDOM_SUFFIX"
+      echo "Defaulting to generated directory: $MOQUI_SETUP_DIR"
+    else
+      MOQUI_SETUP_DIR="moqui"
+      echo "Defaulting to directory: $MOQUI_SETUP_DIR"
+    fi
+  else
+    MOQUI_SETUP_DIR="$USER_INPUT"
+  fi
 fi
 
-cd "$MOQUI_SETUP_DIR" || exit 1
+curl -v https://github.com/moqui/moqui-docker.zip -o "$MOQUI_SETUP_DIR".zip
+unzip "$MOQUI_SETUP_DIR".zip -d "$MOQUI_SETUP_DIR"
 
 # TODO: validate domain for acme http verification
-
-#!/bin/bash
 
 # Load existing .env file if it exists
 if [ -f .env ]; then
