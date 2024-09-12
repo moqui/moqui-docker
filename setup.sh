@@ -70,9 +70,11 @@ tar -xf "$MOQUI_SETUP_DIR.tar" -C "$MOQUI_SETUP_DIR" --strip-components 1
 # Remove the downloaded .tar file after extraction
 rm "$MOQUI_SETUP_DIR.tar"
 
-echo "Moqui Docker repository has been set up in $MOQUI_SETUP_DIR."
+cd "$MOQUI_SETUP_DIR"
 
-# TODO: validate domain for acme http verification
+ls -lah
+
+echo "Moqui Docker repository has been set up in $MOQUI_SETUP_DIR."
 
 # Load existing .env file if it exists
 if [ -f .env ]; then
@@ -81,7 +83,7 @@ fi
 
 # Prompt for domain if not provided as a parameter
 DOMAIN=${1:-$VIRTUAL_HOST}
-if [ -z "$DOMAIN" ]; then
+if [ -n "$DOMAIN" ]; then
   read -rp "Enter the domain to run Moqui: " input
   DOMAIN=${input:-DOMAIN}
   DOMAIN=${DOMAIN:-$VIRTUAL_HOST}
@@ -90,12 +92,6 @@ else
   DOMAIN=${input:-DOMAIN}
   DOMAIN=${DOMAIN:-$VIRTUAL_HOST}
 fi
-
-# Validate the domain
-#while ! validate_domain "$DOMAIN"; do
-#  echo "Invalid domain. Please enter a valid domain for ACME HTTP verification."
-#  read -rp "Enter a valid domain: " DOMAIN
-#done
 
 # Set ACME_EMAIL to the second positional parameter or keep its current value
 ACME_EMAIL=${2:-$ACME_EMAIL}
@@ -117,22 +113,27 @@ export DEFAULT_EMAIL="$ACME_EMAIL"
 export LETSENCRYPT_TEST=true
 
 # Set default passwords or prompt for them if not provided
-POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-$(head -c 16 /dev/random | base64)}
-read -rp "Enter your PostgreSQL password [$POSTGRES_PASSWORD]: " input
-POSTGRES_PASSWORD=${input:-$POSTGRES_PASSWORD}
+if [ -z "$POSTGRES_PASSWORD" ]; then
+  POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-$(head -c 16 /dev/random | base64)}
+  read -rp "Enter your PostgreSQL password [$POSTGRES_PASSWORD]: " input
+  POSTGRES_PASSWORD=${input:-$POSTGRES_PASSWORD}
+fi
 
-ENTITY_DS_CRYPT_PASS=${ENTITY_DS_CRYPT_PASS:-$(head -c 16 /dev/random | base64)}
-read -rp "Enter your Entity DS Crypt password [$ENTITY_DS_CRYPT_PASS]: " input
-ENTITY_DS_CRYPT_PASS=${input:-$ENTITY_DS_CRYPT_PASS}
+if [ -z "$ENTITY_DS_CRYPT_PASS" ]; then
+  ENTITY_DS_CRYPT_PASS=${ENTITY_DS_CRYPT_PASS:-$(head -c 16 /dev/random | base64)}
+  read -rp "Enter your Entity DS Crypt password [$ENTITY_DS_CRYPT_PASS]: " input
+  ENTITY_DS_CRYPT_PASS=${input:-$ENTITY_DS_CRYPT_PASS}
+fi
 
-ELASTICSEARCH_PASSWORD=${ELASTICSEARCH_PASSWORD:-$(head -c 16 /dev/random | base64)}
-read -rp "Enter your Elasticsearch password [$ELASTICSEARCH_PASSWORD]: " input
-ELASTICSEARCH_PASSWORD=${input:-$ELASTICSEARCH_PASSWORD}
+if [ -z "$ELASTICSEARCH_PASSWORD" ]; then
+  ELASTICSEARCH_PASSWORD=${ELASTICSEARCH_PASSWORD:-$(head -c 16 /dev/random | base64)}
+  read -rp "Enter your Elasticsearch password [$ELASTICSEARCH_PASSWORD]: " input
+  ELASTICSEARCH_PASSWORD=${input:-$ELASTICSEARCH_PASSWORD}
+fi
 
 MOQUI_IMAGE=${MOQUI_IMAGE:-moqui/moquidemo}
 read -rp "Enter your moqui image [$MOQUI_IMAGE]: " input
-$MOQUI_IMAGE=${input:-$MOQUI_IMAGE}
-
+MOQUI_IMAGE=${input:-$MOQUI_IMAGE}
 
 # Save the environment variables to a .env file
 cat <<EOF > .env
@@ -151,6 +152,6 @@ echo "Environment setup complete. Configuration saved in $MOQUI_SETUP_DIR/.env f
 
 # Check if there is the adequate docker image to run the docker compose
 
-# Run ./compose-up default-compose.yml
-# if it fails, run ./compose-down.sh default-compose.yml
-./compose-up.sh default-compose.yml . eclipse-temurin:11-jdk .env
+# Run ./compose-up compose/default-compose.yml
+# if it fails, run ./compose-down.sh compose/default-compose.yml
+./compose-up.sh compose/default-compose.yml . eclipse-temurin:11-jdk .env
