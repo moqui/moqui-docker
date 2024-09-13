@@ -7,13 +7,8 @@ if ! [ -x "$(command -v docker)" ]; then
   echo 'Docker is not installed. Please install Docker by running...'
 
   # Download the convenience script
-  echo "curl -fsSL https://get.docker.com -o get-docker.sh"
+  echo "curl -fsSL https://get.docker.com | sh"
 
-  # Run the convenience script
-  echo "sh get-docker.sh"
-
-  # Clean up
-  echo "rm get-docker.sh"
   exit 1
 else
   echo 'Docker is already installed.'
