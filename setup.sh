@@ -18,6 +18,7 @@ fi
 if ! systemctl is-active --quiet docker; then
   echo 'Please start Docker service by running...'
   echo "systemctl start docker"
+  exit 1
 fi
 
 # Check if $MOQUI_SETUP_DIR exists; if not, clone the repository
