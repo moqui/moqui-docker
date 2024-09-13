@@ -27,7 +27,7 @@ if [ -n "$1" ]; then
 elif [ -n "$MOQUI_SETUP_DIR" ]; then
   echo "Using environment variable MOQUI_SETUP_DIR: $MOQUI_SETUP_DIR"
 else
-  read -p "Enter the directory path for Moqui setup [$MOQUI_SETUP_DIR]: " USER_INPUT
+  read -p "Enter the directory path for Moqui setup [$MOQUI_SETUP_DIR]: " USER_INPUT < /dev/tty
 
   # If the user didn't provide input, set a default value
   if [ -z "$USER_INPUT" ]; then
@@ -68,8 +68,6 @@ rm "$MOQUI_SETUP_DIR.tar"
 
 cd "$MOQUI_SETUP_DIR"
 
-ls -lah
-
 echo "Moqui Docker repository has been set up in $MOQUI_SETUP_DIR."
 
 # Load existing .env file if it exists
@@ -80,11 +78,11 @@ fi
 # Prompt for domain if not provided as a parameter
 DOMAIN=${1:-$VIRTUAL_HOST}
 if [ -n "$DOMAIN" ]; then
-  read -rp "Enter the domain to run Moqui: " input
+  read -rp "Enter the domain to run Moqui: " input < /dev/tty
   DOMAIN=${input:-DOMAIN}
   DOMAIN=${DOMAIN:-$VIRTUAL_HOST}
 else
-  read -rp "Enter the domain to run Moqui [$VIRTUAL_HOST]: " input
+  read -rp "Enter the domain to run Moqui [$VIRTUAL_HOST]: " input < /dev/tty
   DOMAIN=${input:-DOMAIN}
   DOMAIN=${DOMAIN:-$VIRTUAL_HOST}
 fi
@@ -93,9 +91,9 @@ fi
 ACME_EMAIL=${2:-$ACME_EMAIL}
 # Prompt for ACME_EMAIL if it is still empty
 if [ -z "$ACME_EMAIL" ]; then
-  read -rp "Enter your ACME email address: " ACME_EMAIL
+  read -rp "Enter your ACME email address: " ACME_EMAIL < /dev/tty
 else
-  read -rp "Enter your ACME email address [$ACME_EMAIL]: " input
+  read -rp "Enter your ACME email address [$ACME_EMAIL]: " input < /dev/tty
   # If the user input is empty, retain the current value of ACME_EMAIL
   ACME_EMAIL=${input:-$ACME_EMAIL}
 fi
@@ -111,24 +109,24 @@ export LETSENCRYPT_TEST=true
 # Set default passwords or prompt for them if not provided
 if [ -z "$POSTGRES_PASSWORD" ]; then
   POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-$(head -c 16 /dev/random | base64)}
-  read -rp "Enter your PostgreSQL password [$POSTGRES_PASSWORD]: " input
+  read -rp "Enter your PostgreSQL password [$POSTGRES_PASSWORD]: " input < /dev/tty
   POSTGRES_PASSWORD=${input:-$POSTGRES_PASSWORD}
 fi
 
 if [ -z "$ENTITY_DS_CRYPT_PASS" ]; then
   ENTITY_DS_CRYPT_PASS=${ENTITY_DS_CRYPT_PASS:-$(head -c 16 /dev/random | base64)}
-  read -rp "Enter your Entity DS Crypt password [$ENTITY_DS_CRYPT_PASS]: " input
+  read -rp "Enter your Entity DS Crypt password [$ENTITY_DS_CRYPT_PASS]: " input < /dev/tty
   ENTITY_DS_CRYPT_PASS=${input:-$ENTITY_DS_CRYPT_PASS}
 fi
 
 if [ -z "$ELASTICSEARCH_PASSWORD" ]; then
   ELASTICSEARCH_PASSWORD=${ELASTICSEARCH_PASSWORD:-$(head -c 16 /dev/random | base64)}
-  read -rp "Enter your Elasticsearch password [$ELASTICSEARCH_PASSWORD]: " input
+  read -rp "Enter your Elasticsearch password [$ELASTICSEARCH_PASSWORD]: " input < /dev/tty
   ELASTICSEARCH_PASSWORD=${input:-$ELASTICSEARCH_PASSWORD}
 fi
 
 MOQUI_IMAGE=${MOQUI_IMAGE:-moqui/moquidemo}
-read -rp "Enter your moqui image [$MOQUI_IMAGE]: " input
+read -rp "Enter your moqui image [$MOQUI_IMAGE]: " input < /dev/tty
 MOQUI_IMAGE=${input:-$MOQUI_IMAGE}
 
 # Save the environment variables to a .env file
